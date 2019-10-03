@@ -142,7 +142,7 @@ class WC_GLSHU_Export
             $csv_row[0] =  ($order->get_payment_method() == $cod) ? $order->get_total() : '';
 
             // Név
-            $csv_row[1] = $order->get_shipping_last_name() .' ' . $order->get_shipping_fist_name();
+            $csv_row[1] = $order->get_shipping_last_name() .' ' . $order->get_shipping_first_name();
 
             // Cím
             $csv_row[2] = $order->get_shipping_address_1() . ' ' . $order->get_shipping_address_2();
