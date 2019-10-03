@@ -4,7 +4,7 @@ Plugin Name: WooCommerce GLS HU Export & Tracking
 Plugin URI: http://webmania.cc
 Description: Rendelések export GLS weblabel importhoz és GLS csomagkövetés
 Author: rrd
-Version: 0.0.2
+Version: 0.0.3
 */
 
 if (! defined('ABSPATH')) {
@@ -29,7 +29,7 @@ class WC_GLSHU_Export
         self::$plugin_basename = plugin_basename(__FILE__);
         self::$plugin_url = plugin_dir_url(self::$plugin_basename);
         self::$plugin_path = trailingslashit(dirname(__FILE__));
-        self::$version = '0.0.2';
+        self::$version = '0.0.3';
 
         $this->status_codes = [
             1 => 'Irsz & Súly rögzítése beérkezés',
@@ -142,7 +142,7 @@ class WC_GLSHU_Export
             $csv_row[0] =  ($order->get_payment_method() == $cod) ? $order->get_total() : '';
 
             // Név
-            $csv_row[1] = $order->get_shipping_last_name() .' ' . $order->get_shipping_first_name();
+            $csv_row[1] = $order->get_shipping_last_name() . ' ' . $order->get_shipping_first_name();
 
             // Cím
             $csv_row[2] = $order->get_shipping_address_1() . ' ' . $order->get_shipping_address_2();
