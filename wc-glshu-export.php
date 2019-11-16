@@ -1,6 +1,6 @@
 <?php
 /*
-Plugin Name: WooCommerce GLS HU Export & Tracking
+Plugin Name: GLS HU Export & Tracking for WooCommerce
 Plugin URI: http://webmania.cc
 Description: Rendelések export GLS weblabel importhoz és GLS csomagkövetés
 Author: rrd
@@ -166,7 +166,7 @@ class WC_GLSHU_Export
             $csv_row[8] = $order->get_order_number();
 
             // megjegyzés
-            $csv_row[9] = $order->get_customer_note();
+            $csv_row[9] = str_replace("\n", " ", $order->get_customer_note());
 
             // darabszám
             $csv_row[10] = 1;
