@@ -1,4 +1,4 @@
-WooCommerce Export & Tracking
+GLS HU Export & Tracking for WooCommerce
 ======================
 Donate link: https://krisnavolgy.hu/adomanyozas/
 Tags: woocommerce, export, tracking
