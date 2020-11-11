@@ -4,7 +4,7 @@ Plugin Name: GLS HU Export & Tracking for WooCommerce
 Plugin URI: http://webmania.cc
 Description: Rendelések export GLS weblabel importhoz és GLS csomagkövetés
 Author: rrd
-Version: 0.0.5
+Version: 0.1.0
 */
 
 if (! defined('ABSPATH')) {
@@ -29,7 +29,7 @@ class WC_GLSHU_Export
         self::$plugin_basename = plugin_basename(__FILE__);
         self::$plugin_url = plugin_dir_url(self::$plugin_basename);
         self::$plugin_path = trailingslashit(dirname(__FILE__));
-        self::$version = '0.0.5';
+        self::$version = '0.1.0';
 
         $this->status_codes = [
             1 => 'Irsz & Súly rögzítése beérkezés',
@@ -96,11 +96,60 @@ class WC_GLSHU_Export
             94 => 'CsomagPont státusz infó'
         ];
 
+        register_activation_hook( __FILE__, [$this, 'set_cron']);
+        add_action('glshu_update_statuses', [$this, 'glshu_update_statuses']);
+        register_deactivation_hook( __FILE__, [$this, 'remove_cron']);
+
         add_filter('bulk_actions-edit-shop_order', [$this, 'register_gls_export']);
         add_filter('handle_bulk_actions-edit-shop_order', [$this, 'gls_export'], 10, 3);
 
         add_action('add_meta_boxes', [$this, 'add_metabox']);
         add_action('woocommerce_process_shop_order_meta', [&$this, 'save_meta_box'], 0, 2);
+    }
+
+    public function set_cron()
+    {
+        if (!wp_next_scheduled('glshu_update_statuses')) {
+            wp_schedule_event(time(), 'hourly', 'glshu_update_statuses');
+        }
+    }
+
+    public function remove_cron() {
+        wp_clear_scheduled_hook('glshu_update_statuses');
+    }
+
+    public function glshu_update_statuses() {
+        $d = date('Y-m-d H:i:s');   // TODO remove test
+        $fp = fopen('/home/rrd/public_html/crontest.txt', 'a'); // TODO remove test
+
+        // collect order ids and gls numbers with shipped status
+        $posted_orders = wc_get_orders([
+            'limit'=>-1,
+            'type'=> 'shop_order',
+            'status'=> 'wc-posted',    // TODO custom status - what about a setting?
+        ]);
+        foreach($posted_orders as $po) {
+            foreach($po->meta_data as $meta) {
+                if ($meta->key == '_GLStrackingNumber') {
+                    //$posted_orders[$po->id] = $meta->value;
+
+                    // check them one by one for current status
+                    $xml = simplexml_load_file('http://online.gls-hungary.com/tt_page_xml.php?pclid=' . $meta->value);
+                    if ($xml && $xml->Parcel->Statuses->children()) {
+                        $status = $xml->Parcel->Statuses->children()[0]['StCode'];
+                        fwrite($fp, $d . '|' . $po->id . ':' . $status . "\n"); // TODO remove test
+                        if ($status == 5) {
+                            // set status to shipped
+                        }
+                        if ($status == 12) {
+                            // set sttaus to error
+                        }
+                    }
+                }
+            }
+        }
+
+        fclose($fp);    // TODO remove test
     }
 
     public function register_gls_export($bulk_actions)
