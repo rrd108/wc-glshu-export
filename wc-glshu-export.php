@@ -105,6 +105,7 @@ class WC_GLSHU_Export
 
         add_action('add_meta_boxes', [$this, 'add_metabox']);
         add_action('woocommerce_process_shop_order_meta', [&$this, 'save_meta_box'], 0, 2);
+        add_filter('plugin_action_links_' . plugin_basename(__FILE__), [$this, 'wc_glshu_export_plugin_links']);
     }
 
     public function set_cron()
@@ -147,6 +148,15 @@ class WC_GLSHU_Export
         }
     }
 
+    public function wc_glshu_export_plugin_links($links)
+    {
+        $plugin_links = [
+            '<a href="' . admin_url('admin.php?page=wc-settings&tab=settings_tab_glshuexport') . '">'
+            . 'Beállítások' . '</a>'
+        ];
+
+        return array_merge($plugin_links, $links);
+    }
     public function register_gls_export($bulk_actions)
     {
         $bulk_actions['gls_export'] = __('GLS export', 'wc_glshu_export');
