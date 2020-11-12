@@ -126,26 +126,28 @@ class WC_GLSHU_Export
 
     public function glshu_update_statuses() {
 
-        // collect order ids and gls numbers with shipped status
-        $posted_orders = wc_get_orders([
-            'limit'=>-1,
-            'type'=> 'shop_order',
-            'status'=> 'wc-posted',    // TODO custom status - what about a setting?
-        ]);
-        foreach($posted_orders as $po) {
-            foreach($po->meta_data as $meta) {
-                if ($meta->key == '_GLStrackingNumber') {
-                    //$posted_orders[$po->id] = $meta->value;
+        if (get_option('wc_glshu_auto_status') === 'yes') {
+            // collect order ids and gls numbers with shipped status
+            $posted_orders = wc_get_orders([
+                'limit'=>-1,
+                'type'=> 'shop_order',
+                'status'=> get_option('wc_glshu_posted', 'wc-posted'),
+            ]);
+            foreach($posted_orders as $po) {
+                foreach($po->meta_data as $meta) {
+                    if ($meta->key == '_GLStrackingNumber') {
+                        //$posted_orders[$po->id] = $meta->value;
 
-                    // check them one by one for current status
-                    $xml = simplexml_load_file('http://online.gls-hungary.com/tt_page_xml.php?pclid=' . $meta->value);
-                    if ($xml && $xml->Parcel->Statuses->children()) {
-                        $status = $xml->Parcel->Statuses->children()[0]['StCode'];
-                        if ($status == 5) {
-                            $po->update_status('completed');
-                        }
-                        if ($status == 12) {
-                            $po->update_status('shipping-problem'); // TODO custom status - what about a setting?
+                        // check them one by one for current status
+                        $xml = simplexml_load_file('http://online.gls-hungary.com/tt_page_xml.php?pclid=' . $meta->value);
+                        if ($xml && $xml->Parcel->Statuses->children()) {
+                            $status = $xml->Parcel->Statuses->children()[0]['StCode'];
+                            if ($status == 5) {
+                                $po->update_status(substr(get_option('wc_glshu_completed', 'wc-completed'),3));
+                            }
+                            if ($status == 12 || $status == 23) {
+                                $po->update_status(substr(get_option('wc_glshu_shipping_error', 'wc-failed'),3));
+                            }
                         }
                     }
                 }
