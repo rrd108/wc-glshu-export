@@ -119,8 +119,6 @@ class WC_GLSHU_Export
     }
 
     public function glshu_update_statuses() {
-        $d = date('Y-m-d H:i:s');   // TODO remove test
-        $fp = fopen('/home/rrd/public_html/crontest.txt', 'a'); // TODO remove test
 
         // collect order ids and gls numbers with shipped status
         $posted_orders = wc_get_orders([
@@ -137,7 +135,6 @@ class WC_GLSHU_Export
                     $xml = simplexml_load_file('http://online.gls-hungary.com/tt_page_xml.php?pclid=' . $meta->value);
                     if ($xml && $xml->Parcel->Statuses->children()) {
                         $status = $xml->Parcel->Statuses->children()[0]['StCode'];
-                        fwrite($fp, $d . '|' . $po->id . ':' . $status . "\n"); // TODO remove test
                         if ($status == 5) {
                             $po->update_status('completed');
                         }
@@ -148,8 +145,6 @@ class WC_GLSHU_Export
                 }
             }
         }
-
-        fclose($fp);    // TODO remove test
     }
 
     public function register_gls_export($bulk_actions)
