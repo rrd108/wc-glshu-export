@@ -190,10 +190,18 @@ class WC_GLSHU_Export
             [
                 'id' => 'wc_glshu_posted',
                 'title' => 'A feladott csomagok státusza',
-                'desc'   => 'Ez az a státusz aminél a GLS követési szám már meg van adva és a csomagot a futár már átvette',
+                'desc'   => 'Az automata státusz állítás azokra a rendelésekre történik meg amelyek ebben a státuszban vannak. Ez az a státusz aminél a GLS követési szám már meg van adva és a csomagot a futár már átvette.',
                 'type' => 'select',
                 'options' => $statuses,
                 'default' => 'wc-processing'
+            ],
+            [
+                'id' => 'wc_glshu_completed',
+                'title' => 'A leszállított rendelés státusza',
+                'desc'   => 'A rendelést erre a státuszra állítjuk be ha a GLS szerint a vásárló azt már megkapta.',
+                'type' => 'select',
+                'options' => $statuses,
+                'default' => 'wc-completed'
             ],
             [
                 'id' => 'wc_glshu_shipping_error',
@@ -212,6 +220,7 @@ class WC_GLSHU_Export
     {
         update_option('wc_glshu_auto_status', $_POST['wc_glshu_auto_status'] ? 'yes' : 'no');
         update_option('wc_glshu_posted', $_POST['wc_glshu_posted']);
+        update_option('wc_glshu_completed', $_POST['wc_glshu_completed']);
         update_option('wc_glshu_shipping_error', $_POST['wc_glshu_shipping_error']);
     }
 
