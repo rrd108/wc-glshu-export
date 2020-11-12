@@ -139,10 +139,10 @@ class WC_GLSHU_Export
                         $status = $xml->Parcel->Statuses->children()[0]['StCode'];
                         fwrite($fp, $d . '|' . $po->id . ':' . $status . "\n"); // TODO remove test
                         if ($status == 5) {
-                            // set status to shipped
+                            $po->update_status('completed');
                         }
                         if ($status == 12) {
-                            // set sttaus to error
+                            $po->update_status('shipping-problem'); // TODO custom status - what about a setting?
                         }
                     }
                 }
