@@ -187,7 +187,7 @@ class WC_GLSHU_Export
                 'type'    => 'checkbox',
                 'id' => 'wc_glshu_auto_status',
                 'desc' => 'A beállított eseményeknél a rendelési státuszt a rendszer automatikusan átállítja. Ha ez nincs kipipálva akkor a többi beállítást figyelmen kívűl hagyjuk.',
-                'default' => 'yes'
+                'default' => 'no'
             ],
             [
                 'id' => 'wc_glshu_posted',
