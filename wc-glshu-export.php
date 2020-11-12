@@ -110,6 +110,7 @@ class WC_GLSHU_Export
 
         add_filter('woocommerce_settings_tabs_array', [$this, 'add_settings_tab'], 50);
         add_action('woocommerce_settings_tabs_settings_tab_glshuexport', [$this, 'settings_tab']);
+        add_action('woocommerce_update_options_settings_tab_glshuexport', [$this, 'update_settings']);
     }
 
     public function set_cron()
@@ -171,28 +172,47 @@ class WC_GLSHU_Export
     public function settings_tab()
     {
         $statuses = function_exists('wc_get_order_statuses') ? wc_get_order_statuses() : [];
-        $this->form_fields = apply_filters(
-                'wc_simplepayhu_form_fields',
-                [
-                    'enabled' => [
-                        'title'   => __('Enable/Disable', 'wc-simplepayhu'),
-                        'type'    => 'checkbox',
-                        'label'   => __('Enable SimplePay Payment', 'wc-simplepayhu'),
-                        'description' => 'IPN url: ' . site_url() . '?wc-api=wc_gateway_simplepayhu',
-                        'default' => 'yes'
-                    ]
-                ]
-        );
+        $statuses['ignore'] =  'ne módosítsd a státuszt';
+        $settings = [
+            [
+                'type' => 'title',
+                'title' => 'GLS HU export beállítások',
+                'id' => 'wc_glshu_export_options',
+                'desc' => 'Státusz beállítások',
+            ],
+            [
+                'title'   => 'Automatikus státusz frissítések engedélyezése',
+                'type'    => 'checkbox',
+                'id' => 'wc_glshu_auto_status',
+                'desc' => 'A beállított eseményeknél a rendelési státuszt a rendszer automatikusan átállítja. Ha ez nincs kipipálva akkor a többi beállítást figyelmen kívűl hagyjuk.',
+                'default' => 'yes'
+            ],
+            [
+                'id' => 'wc_glshu_posted',
+                'title' => 'A feladott csomagok státusza',
+                'desc'   => 'Ez az a státusz aminél a GLS követési szám már meg van adva és a csomagot a futár már átvette',
+                'type' => 'select',
+                'options' => $statuses,
+                'default' => 'wc-processing'
+            ],
+            [
+                'id' => 'wc_glshu_shipping_error',
+                'title' => 'Szállítási hiba státusza',
+                'desc'   => 'Ez az a státusz amit akkor állítunk be ha a GLS valami szállítási hibát jelez (Átvevő nem található / Vissza a feladónak)',
+                'type' => 'select',
+                'options' => $statuses,
+                'default' => 'wc-failed'
+            ]
+        ];
 
-        $settings = array();
-        $settings[] = array(
-            'type' => 'title',
-            'title' => __('Billingo API Beállítások', 'billingo'),
-            'id' => 'woocommerce_billingo_options',
-            'desc' => __('A nyilvános és privát kulcs megadása és elmentése után megjelenik a fizetési módok szekció. Ha nem látszik, hibás valamelyik kulcs.', 'billingo'),
-        );
+        woocommerce_admin_fields(apply_filters('wc_glshuexport_settings', $settings));
+    }
 
-        return apply_filters('wc_settings_tab_glshuexport_settings', $settings);
+    public function update_settings()
+    {
+        update_option('wc_glshu_auto_status', $_POST['wc_glshu_auto_status'] ? 'yes' : 'no');
+        update_option('wc_glshu_posted', $_POST['wc_glshu_posted']);
+        update_option('wc_glshu_shipping_error', $_POST['wc_glshu_shipping_error']);
     }
 
     public function register_gls_export($bulk_actions)
