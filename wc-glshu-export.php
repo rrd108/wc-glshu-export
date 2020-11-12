@@ -105,7 +105,11 @@ class WC_GLSHU_Export
 
         add_action('add_meta_boxes', [$this, 'add_metabox']);
         add_action('woocommerce_process_shop_order_meta', [&$this, 'save_meta_box'], 0, 2);
+
         add_filter('plugin_action_links_' . plugin_basename(__FILE__), [$this, 'wc_glshu_export_plugin_links']);
+
+        add_filter('woocommerce_settings_tabs_array', [$this, 'add_settings_tab'], 50);
+        add_action('woocommerce_settings_tabs_settings_tab_glshuexport', [$this, 'settings_tab']);
     }
 
     public function set_cron()
@@ -157,6 +161,40 @@ class WC_GLSHU_Export
 
         return array_merge($plugin_links, $links);
     }
+
+    public function add_settings_tab($settings_tabs)
+    {
+        $settings_tabs['settings_tab_glshuexport'] = 'GLS HU export';
+        return $settings_tabs;
+    }
+
+    public function settings_tab()
+    {
+        $statuses = function_exists('wc_get_order_statuses') ? wc_get_order_statuses() : [];
+        $this->form_fields = apply_filters(
+                'wc_simplepayhu_form_fields',
+                [
+                    'enabled' => [
+                        'title'   => __('Enable/Disable', 'wc-simplepayhu'),
+                        'type'    => 'checkbox',
+                        'label'   => __('Enable SimplePay Payment', 'wc-simplepayhu'),
+                        'description' => 'IPN url: ' . site_url() . '?wc-api=wc_gateway_simplepayhu',
+                        'default' => 'yes'
+                    ]
+                ]
+        );
+
+        $settings = array();
+        $settings[] = array(
+            'type' => 'title',
+            'title' => __('Billingo API Beállítások', 'billingo'),
+            'id' => 'woocommerce_billingo_options',
+            'desc' => __('A nyilvános és privát kulcs megadása és elmentése után megjelenik a fizetési módok szekció. Ha nem látszik, hibás valamelyik kulcs.', 'billingo'),
+        );
+
+        return apply_filters('wc_settings_tab_glshuexport_settings', $settings);
+    }
+
     public function register_gls_export($bulk_actions)
     {
         $bulk_actions['gls_export'] = __('GLS export', 'wc_glshu_export');
